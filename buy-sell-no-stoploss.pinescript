@@ -160,11 +160,21 @@ CondIni = 0
 CondIni := longCond ? 1 : shortCond ? -1 : CondIni[1]
 longCondition = longCond and CondIni[1] == -1
 shortCondition = shortCond and CondIni[1] == 1
+
+shortConditionNoStopLoss = shortCondition and close >= strategy.position_avg_price and strategy.position_size > 0
+
 trendColor = longCondition ? color.red : shortCondition ? color.green : na
 // === /Alerts ===
 plot(myLineToggle ? longCondition ? low - 0.004 : shortCondition ? high + 0.004 : na : na, color=trendColor, style=plot.style_line, linewidth=4, editable=false)
 
+plotshape(myLabelToggle ?longCondition:na, title="Buy Signal", text="BUY", textcolor=color.green, style=shape.triangleup, size=size.huge, location=location.belowbar, color=color.green, transp=0)
+plotshape(myLabelToggle ?shortConditionNoStopLoss:na, title="Sell Signal", text="SELL", textcolor=color.red, style=shape.triangledown, size=size.huge, location=location.abovebar, color=color.red, transp=0)
+
+
 if longCondition
     strategy.entry('Buy', strategy.long)
-else if shortCondition and close >= strategy.position_avg_price and strategy.position_size > 0
+else if shortConditionNoStopLoss
     strategy.close('Buy')
+alertcondition(longCondition, title=" Buy", message=" BUY")
+alertcondition(shortConditionNoStopLoss, title=" Sell", message=" SELL")
+
